@@ -4,7 +4,7 @@
 PololuLedStrip<12> ledStrip;
 
 // Create a buffer for holding the colors (3 bytes per color).
-#define LED_COUNT 300
+#define LED_COUNT 255
 rgb_color colors[LED_COUNT];
 
 void setup()
