@@ -180,11 +180,17 @@ class RainbowEffect(Effect):
 class FadeEffect(Effect):
 
     def tick(self):
-        for cube in self.leds.cubes:
-            target_color = random.choice(COLORS)
-            fade_color(cube, target_color, duration=1.0/self.speed)
-        self.leds.show()
-        time.sleep(1.1/self.speed)  # Wait for fade to complete
+        fade_steps = 20  # Number of steps for the fade
+        for step in range(fade_steps):
+            for cube in self.leds.cubes:
+                target_color = random.choice(COLORS)
+                current_color = cube.color if hasattr(cube, 'color') else (0, 0, 0)
+                # Interpolate between current color and target color
+                new_color = tuple(int(current_color[i] + (target_color[i] - current_color[i]) * (step / fade_steps)) for i in range(3))
+                cube.set_color(new_color)
+            self.leds.show()
+            time.sleep(1.0 / fade_steps / self.speed)
+
 
 class BlinkEffect(Effect):
 
@@ -315,4 +321,119 @@ class RotationEffect2(Effect):
             self.leds.show()
             time.sleep(0.003 / self.speed)
 
+
+class ColorWaveEffect2(Effect):
+
+    def tick(self):
+        # Choose a random color from COLORS
+        color = random.choice(COLORS)
+
+        # Define the direction of the wave (1 for forward, -1 for backward)
+        direction = random.choice([-1, 1])
+
+        # Iterate through LED cubes
+        for offset in range(12):
+
+            # Clear the LEDs
+            self.leds.clear()
+
+            # Calculate the position of the wave
+            pos = offset / 10 * direction
+
+            # Iterate through each LED in the cube
+            for cube in self.leds.cubes:
+                for x in range(12):
+                    # Calculate the distance from the wave position to the current LED
+                    distance = abs(pos - x)
+
+                    # Determine the color intensity based on distance
+                    if distance <= 1.0:
+                        output_color = color
+                    elif distance < 4:
+                        output_color = fade_color(color, 0.3 / distance)
+                    else:
+                        output_color = (0, 0, 0)
+
+                    # Set the color to the LED
+                    if x < 3:
+                        side = cube.left
+                    elif x < 6:
+                        side = cube.front
+                    elif x < 9:
+                        side = cube.right
+                    else:
+                        side = cube.back
+                    for y in range(3):
+                        side[x % 3][y] = output_color
+
+            # Show the LEDs
+            self.leds.show()
+
+            # Wait for a short duration to create animation effect
+            time.sleep(0.03 / self.speed)
+
+class ColorWaveEffect3(KickTriggeredEffect):
+    def kick(self):
+        for _ in range(10):
+            for i in range(len(self.leds.cubes)):
+                color = random.choice(COLORS)
+                for j, cube in enumerate(self.leds.cubes):
+                    brightness = max(0, min(255, int(255 * (math.sin((i+j) / 5) / 2 + 0.5))))
+                    cube.set_color((color[0]*brightness//255, color[1]*brightness//255, color[2]*brightness//255))
+                self.leds.show()
+                time.sleep(0.1/self.speed)
+
+class ColorRandomBlinkEffect(KickTriggeredEffect):
+    def kick(self):
+        for _ in range(10):
+            for cube in self.leds.cubes:
+                if random.random() < 0.5:
+                    cube.set_color(random.choice(COLORS))
+                else:
+                    cube.set_color((0, 0, 0))
+            self.leds.show()
+            time.sleep(0.2/self.speed)
+
+class KickTriggeredPlanets(KickTriggeredEffect):
+
+    def __init__(self, leds, num_planets=3, speed=1.0):
+        super().__init__(leds, speed)
+        self.num_planets = num_planets
+
+    def kick(self):
+        for _ in range(self.num_planets):
+            planet_color = random.choice(COLORS2)
+            planet_led = random.choice(self.leds.cubes)
+            planet_led.set_color(planet_color)
+        self.leds.show()
+
+class PulsatingPlanets(KickTriggeredEffect):
+
+    def __init__(self, leds, num_planets=3, speed=1.0, fade_duration=1.0):
+        super().__init__(leds, speed)
+        self.num_planets = num_planets
+        self.fade_duration = fade_duration
+
+    def kick(self):
+        for _ in range(self.num_planets):
+            planet_color = random.choice(COLORS2)
+            planet_led = random.choice(self.leds.cubes)
+            fade_color(planet_led, planet_color, duration=self.fade_duration)
+        self.leds.show()
+
+class RotatingPlanets(KickTriggeredEffect):
+
+    def __init__(self, leds, num_planets=3, speed=1.0, rotation_speed=0.1):
+        super().__init__(leds, speed)
+        self.num_planets = num_planets
+        self.rotation_speed = rotation_speed
+
+    def kick(self):
+        for _ in range(self.num_planets):
+            planet_led = random.choice(self.leds.cubes)
+            for color in COLORS2:
+                planet_led.set_color(color)
+                self.leds.show()
+                time.sleep(self.rotation_speed)
+        self.leds.show()
 

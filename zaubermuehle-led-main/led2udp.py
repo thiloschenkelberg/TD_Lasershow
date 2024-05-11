@@ -28,8 +28,8 @@ EFFECTS = [
     #StrobeEffect,
     #PulseEffect,
     #RotationEffect,
-    #RainbowEffect,
-    #FadeEffect,
+    RainbowEffect,
+    #FadeEffect,            
     #BlinkEffect,
     #ColorExplosionEffect,
     #RandomChaseEffect,
@@ -38,6 +38,13 @@ EFFECTS = [
     #ColorPulseEffect,
     #ColorRainEffect,
     #RotationEffect2,
+    #ColorWaveEffect2,
+    #ColorWaveEffect3,
+    #ColorRandomBlinkEffect,
+    #KickTriggeredPlanets,
+    #PulsatingPlanets,
+    #RotatingPlanets
+
 ]
 
 EFFECT_TIME = 4.0 # s
